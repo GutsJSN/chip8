@@ -92,10 +92,10 @@ private:
     uint16_t fetchOpcode();
     void executeOpcode(uint16_t opcode);
 };
-
+//read the ROM file and load it into memory
 void Chip8::loadROM(const std::string &filename)
 {
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
+    std::ifstream file(filename, std::ios::binary | std::ios::ate);//positions file pointer to the end of the file
 
     if (!file.is_open())
     {
@@ -103,14 +103,14 @@ void Chip8::loadROM(const std::string &filename)
         return;
     }
 
-    std::streamsize size = file.tellg();
+    std::streamsize size = file.tellg();//returns the position of file pointer ie end of the file
 
     if (size > MEMORY_SIZE) {
         std::cerr << "ROM FILE size exceeded limits" << std::endl;
         exit(1);
     }
 
-    file.seekg(0, std::ios::beg);
+    file.seekg(0, std::ios::beg);//repositions file pointer to the beginning of the file
 
     std::vector<char> buffer(size);
     if (file.read(buffer.data(), size))
@@ -123,12 +123,12 @@ void Chip8::loadROM(const std::string &filename)
 
     file.close();
 }
-
+//fetch opcodes from the memory
 uint16_t Chip8::fetchOpcode()
 {
     return (memory[pc] << 8) | memory[pc + 1];
 }
-
+//executes the opcodes retrieved from the memory
 void Chip8::executeOpcode(uint16_t opcode)
 {
 
@@ -421,7 +421,7 @@ void Chip8::executeOpcode(uint16_t opcode)
         break;
     }
 }
-
+//acts as a cycle for emulator to run the opcodes
 void Chip8::emulateCycle()
 {
     uint16_t opcode = fetchOpcode();
@@ -437,7 +437,7 @@ void Chip8::emulateCycle()
         --soundTimer;
     }
 }
-
+//display rendering
 void Chip8::renderDisplay(SDL_Renderer *renderer)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -452,15 +452,15 @@ void Chip8::renderDisplay(SDL_Renderer *renderer)
             if (display[y * DISPLAY_WIDTH + x])
             {
                 SDL_Rect pixel = {x * PIXEL_SCALE, y * PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE};
-                SDL_RenderFillRect(renderer, &pixel);
+                SDL_RenderFillRect(renderer, &pixel);//colors the pixels on the screen
             }
         }
     }
 
-    SDL_RenderPresent(renderer);
-    drawFlag = false;
+    SDL_RenderPresent(renderer);//updates the screen with any rendering done in previous steps
+    drawFlag = false;//indicates that the screen has been updated
 }
-
+//updates the state of a specific key on the keypad
 void Chip8::setKeyState(uint8_t key, bool pressed)
 {
     if (key < KEYPAD_SIZE)
@@ -476,13 +476,13 @@ int main(int argc, char *argv[])
         std::cerr << "Usage: " << argv[0] << " <ROM file>" << std::endl;
         return 1;
     }
-
+    //initializing SDL with all subsystems,if exit code is less than 0,error is indicated
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
         return 1;
     }
-
+    //creates the SDL window on the screen
     SDL_Window *window = SDL_CreateWindow("CHIP-8 Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DISPLAY_WIDTH * PIXEL_SCALE, DISPLAY_HEIGHT * PIXEL_SCALE, SDL_WINDOW_SHOWN);
     if (!window)
     {
@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
         SDL_Quit();
         return 1;
     }
-
+    //creates the renderer for the window
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
     {
